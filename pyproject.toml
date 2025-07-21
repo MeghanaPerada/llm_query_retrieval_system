@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "llm-query-retrieval-system"
+version = "0.1.0"
+description = ""
+authors = ["Meghana <meghanaperada9@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.13"
+langchain = "^0.1"
+openai = "^1.0"
+faiss-cpu = "^1.7"
+streamlit = "^1.33"
+fastapi = "^0.111"
+uvicorn = "^0.30"
+pymupdf = "^1.23"
+python-dotenv = "^1.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
