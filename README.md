@@ -51,7 +51,7 @@ llm_query_retrieval_system/
 ├── README.md
 
 ## Installation
-git clone https://github.com/yourusername/llm_query_retrieval_system.git
+git clone https://github.com/MeghanaPerada/llm_query_retrieval_system.git
 cd llm_query_retrieval_system
 
 ## Install dependencies using Poetry
