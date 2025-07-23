@@ -2,7 +2,6 @@ import re
 import numpy as np
 
 def extract_entities(query: str):
-    # Rudimentary NER for demo
     return {
         "age": re.findall(r"\d{2}", query),
         "location": re.findall(r"in (\w+)", query),

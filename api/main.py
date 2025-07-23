@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from app.chains import process_insurance_query
+from app.config import OPENAI_API_KEY  # 🔐 Load to ensure .env is triggered
 
 app = FastAPI()
 

@@ -1,21 +1,43 @@
-from langchain.chains import RetrievalQA
-from langchain_openai import ChatOpenAI
-from app.vector_store import load_faiss_index
-from app.utils import extract_entities, calculate_confidence
+import json
+from llm_chain import run_llm_chain
+from utils.document_loader import load_and_split_document
+from langchain.vectorstores import FAISS
+from langchain.embeddings import OpenAIEmbeddings
 
-def process_insurance_query(user_query: str):
-    vectorstore = load_faiss_index()
-    retriever = vectorstore.as_retriever(search_kwargs={"k": 4})
+def process_insurance_query(query, uploaded_file):
+    # Load and split document into chunks
+    split_docs = load_and_split_document(uploaded_file)
+    texts = [doc.page_content for doc in split_docs]
 
-    llm = ChatOpenAI(model="gpt-3.5-turbo")
-    qa_chain = RetrievalQA.from_chain_type(llm=llm, retriever=retriever)
+    # Create FAISS vector store from the uploaded document
+    embeddings = OpenAIEmbeddings()
+    vector_store = FAISS.from_texts(texts, embedding=embeddings)
 
-    result = qa_chain.invoke(user_query)
+    # Retrieve top relevant clauses
+    retriever = vector_store.as_retriever(search_kwargs={"k": 5})
+    relevant_docs = retriever.get_relevant_documents(query)
+    clauses = [doc.page_content for doc in relevant_docs]
 
-    # Add structured output
+    # Dummy entity extraction (you can replace with regex or another chain)
+    entities = {"query": query}
+
+    # Run the LLM decision chain
+    raw_output = run_llm_chain(entities, clauses)
+
+    # Parse LLM response (JSON)
+    try:
+        parsed = json.loads(raw_output)
+    except json.JSONDecodeError:
+        parsed = {
+            "decision": "Needs More Info",
+            "justification_clauses": [],
+            "confidence": 0.3,
+            "entities": entities
+        }
+
     return {
-        "decision": "Approved" if "covered" in result['result'].lower() else "Rejected",
-        "justification": result['result'],
-        "entities": extract_entities(user_query),
-        "confidence": calculate_confidence(result.get("source_documents", []))
+        "decision": parsed["decision"],
+        "justification": "\n\n".join(parsed["justification_clauses"]),
+        "confidence": parsed.get("confidence", 0.5),
+        "entities": parsed.get("entities", entities),
     }
